@@ -59,3 +59,71 @@ FROM unnormalizedData;
 
 -- select * from normalized_books_1NF
 
+
+-- 2ND NORMAL FORM
+CREATE TABLE Courses (
+    CRN INT PRIMARY KEY,
+    Course_Name VARCHAR(255) NOT NULL
+);
+
+INSERT INTO Courses (CRN, Course_Name)
+SELECT DISTINCT CRN, Course_Name
+FROM normalized_books_1NF;
+
+-- select * from public.courses
+
+create table Books(
+	ISBN VARCHAR(13) primary key,
+    Title VARCHAR(255),
+    Edition VARCHAR(50),
+    Publisher VARCHAR(255),
+    Publisher_address text,
+    Pages INT,
+    Year INT
+);
+
+
+INSERT INTO Books (ISBN, Title, Edition, Publisher, Publisher_address, Pages, Year)
+SELECT DISTINCT ISBN, Title, Edition, Publisher, Publisher_address, Pages, Year FROM normalized_books_1NF;
+
+-- select * from public.Books
+
+CREATE TABLE Authors (
+    Author_ID SERIAL PRIMARY KEY,
+    Author_Name VARCHAR(255) NOT NULL UNIQUE
+);
+
+INSERT INTO Authors (Author_Name)
+SELECT DISTINCT Author
+FROM normalized_books_1NF;
+
+-- select * from public.authors
+
+CREATE TABLE CourseBook (
+    CRN INT,
+    ISBN VARCHAR(13),
+    PRIMARY KEY (CRN, ISBN),
+    FOREIGN KEY (CRN) REFERENCES Courses(CRN) ON DELETE CASCADE,
+    FOREIGN KEY (ISBN) REFERENCES Books(ISBN) ON DELETE CASCADE
+);
+
+INSERT INTO CourseBook (CRN, ISBN)
+SELECT DISTINCT CRN, ISBN
+FROM normalized_books_1NF;
+
+-- select * from public.coursebook
+
+CREATE TABLE BookAuthor (
+    ISBN VARCHAR(13),
+    Author_ID INT,
+    PRIMARY KEY (ISBN, Author_ID),
+    FOREIGN KEY (ISBN) REFERENCES Books(ISBN) ON DELETE CASCADE,
+    FOREIGN KEY (Author_ID) REFERENCES Authors(Author_ID) ON DELETE CASCADE
+);
+
+INSERT INTO BookAuthor (ISBN, Author_ID)
+SELECT DISTINCT n.ISBN, a.Author_ID
+FROM normalized_books_1NF n
+JOIN Authors a ON n.Author = a.Author_Name;
+
+-- select * from BookAuthor
