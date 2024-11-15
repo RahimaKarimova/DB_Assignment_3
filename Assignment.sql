@@ -127,3 +127,44 @@ FROM normalized_books_1NF n
 JOIN Authors a ON n.Author = a.Author_Name;
 
 -- select * from BookAuthor
+
+CREATE TABLE Publication (
+    Publication_ID SERIAL PRIMARY KEY,
+    Publisher_Name VARCHAR(255) NOT NULL UNIQUE,
+    Publisher_Address VARCHAR(255)
+);
+
+INSERT INTO Publication (Publisher_Name, Publisher_Address)
+SELECT DISTINCT Publisher, Publisher_Address
+FROM Books;
+
+-- select * from public.publication
+
+
+ALTER TABLE Books
+DROP COLUMN IF EXISTS publisher,
+DROP COLUMN IF EXISTS publisher_address;
+
+
+
+CREATE TABLE BookPublication (
+    ISBN VARCHAR(13),
+    Publication_ID INT,
+    PRIMARY KEY (ISBN, Publication_ID),
+    FOREIGN KEY (ISBN) REFERENCES Books(ISBN) ON DELETE CASCADE,
+    FOREIGN KEY (Publication_ID) REFERENCES Publication(Publication_ID) ON DELETE CASCADE
+);
+
+INSERT INTO BookPublication (ISBN, Publication_ID)
+SELECT DISTINCT n.ISBN, p.Publication_ID
+FROM normalized_books_1NF n
+JOIN Publication p ON n.Publisher = p.Publisher_Name;
+
+
+-- SELECT * FROM Courses;
+-- SELECT * FROM Books;
+-- SELECT * FROM Authors;
+-- SELECT * FROM CourseBook;
+-- SELECT * FROM BookAuthor;
+-- SELECT * FROM Publication;
+-- SELECT * FROM BookPublication;
